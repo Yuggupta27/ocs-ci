@@ -5,7 +5,7 @@ from ocs_ci.ocs.ocp import wait_for_cluster_connectivity
 from ocs_ci.ocs import constants, node
 from ocs_ci.ocs.resources.pod import get_fio_rw_iops
 from ocs_ci.utility.utils import ceph_health_check
-from ocs_ci.ocs.cluster import CephCluster
+from ocs_ci.ocs.cluster import CephCluster, CephClusterExternal
 
 
 logger = logging.getLogger(__name__)
@@ -55,7 +55,7 @@ class Sanity:
             self.pod_objs.append(pod_factory(pvc=pvc_obj, interface=interface))
         if run_io:
             for pod in self.pod_objs:
-                pod.run_io('fs', '1G')
+                pod.run_io('fs', '1G', runtime=30)
             for pod in self.pod_objs:
                 get_fio_rw_iops(pod)
 
@@ -74,3 +74,19 @@ class Sanity:
             pvc_obj.delete()
         for pvc_obj in self.pvc_objs:
             pvc_obj.ocp.wait_for_delete(pvc_obj.name)
+
+
+class SanityExternalCluster(Sanity):
+    """
+    Helpers for health check and functional validation
+    in Independent mode
+    """
+
+    def __init__(self):
+        """
+        Initializer for Sanity class - Init CephCluster() in order to
+        set the cluster status before starting the tests
+        """
+        self.pvc_objs = list()
+        self.pod_objs = list()
+        self.ceph_cluster = CephClusterExternal()
