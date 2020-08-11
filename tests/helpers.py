@@ -609,6 +609,39 @@ def create_multiple_pvcs(
     ]
 
 
+def create_pvc_clone(
+        sc_name, parent_pvc_name, size=None, pvc_name=None, do_reload=True, volume_mode=None
+):
+    """
+    Create a cloned pvc from existing pvc
+    Args:
+        sc_name (str): The name of the storageclass
+        parent_pvc_name (str): The name of the pvc from which a cloned pvc would be created
+        pvc_name (str): The name of the PVC being created
+        namespace (str): The namespace for the PVC creation
+        size (str): Size of pvc being created
+        do_reload (bool): True for wait for reloading PVC after its creation, False otherwise
+        access_mode (str): The access mode to be used for the PVC
+        volume_mode (str): Volume mode for rbd RWX pvc i.e. 'Block'
+    Returns:
+        PVC: PVC instance
+    """
+    pvc_data = templating.load_yaml(constants.CSI_RBD_PVCCLONE_YAML)
+    pvc_data['metadata']['name'] = (
+        pvc_name if pvc_name else create_unique_resource_name(
+            'cloned', 'pvc'
+        )
+    )
+    pvc_data['spec']['storageClassName'] = 'ocs-storagecluster-ceph-rbd'
+    if volume_mode:
+        pvc_data['spec']['volumeMode'] = volume_mode
+    pvc_data['spec']['dataSource']['name'] = parent_pvc_name
+    ocs_obj = pvc.PVC(**pvc_data)
+    created_pvc = ocs_obj.create(do_reload=do_reload)
+    assert created_pvc, f"Failed to create resource {pvc_name}"
+    return ocs_obj
+
+
 def verify_block_pool_exists(pool_name):
     """
     Verify if a Ceph block pool exist

@@ -77,6 +77,7 @@ STATUS_RELEASED = 'Released'
 STATUS_COMPLETED = 'Completed'
 STATUS_ERROR = 'Error'
 STATUS_CLBO = 'CrashLoopBackOff'
+STATUS_READYTOUSE = "ReadyToUse"
 
 # NooBaa statuses
 BS_AUTH_FAILED = 'AUTH_FAILED'
@@ -258,6 +259,10 @@ CSI_RBD_STORAGECLASS_YAML = os.path.join(
 
 ROOK_CSI_RBD_STORAGECLASS_YAML = os.path.join(
     ROOK_CSI_RBD_DIR, "storageclass.yaml"
+)
+
+CSI_RBD_PVCCLONE_YAML = os.path.join(
+    TEMPLATE_CSI_RBD_DIR, "pvc-clone.yaml"
 )
 
 CSI_CEPHFS_STORAGECLASS_YAML = os.path.join(
